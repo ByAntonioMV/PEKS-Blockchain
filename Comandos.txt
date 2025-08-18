@@ -1,0 +1,10 @@
+Ejecutar Ganache
+./ganache-2.7.1-linux-x86_64.AppImage
+
+Compilar el contrato inteligente
+npx hardhat compile
+
+Compilar los deploys
+npx hardhat run scripts/deploy.js --network ganache
+
+

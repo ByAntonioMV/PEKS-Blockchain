@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Hospital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'peks-blue': '#1e40af',
+                        'peks-light-blue': '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold text-peks-blue">Portal del Hospital</h1>
+                <p class="text-gray-600">Gestión de historiales clínicos de pacientes.</p>
+            </div>
+            <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Cerrar Sesión</button>
+        </header>
+
+        <!-- Sección de Búsqueda y Acción con botón -->
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8 flex flex-col md:flex-row items-center gap-4">
+            <div class="relative flex-grow w-full">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                </div>
+                <input type="search" id="searchInput" placeholder="Buscar por palabra clave..." class="w-full p-4 pl-10 border rounded-lg">
+            </div>
+            <button id="searchBtn" class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">Buscar</button>
+            <button id="openModalBtn" class="bg-peks-blue hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">
+                Registrar Historial
+            </button>
+        </div>
+
+        <!-- Resultados de Búsqueda -->
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Resultados</h2>
+            <div id="resultsContainer" class="bg-white p-4 rounded-xl shadow-md border border-gray-200 text-center">
+                <p class="text-gray-500">Los resultados de la búsqueda aparecerán aquí.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para el Formulario de Historial Clínico -->
+    <div id="historialModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b flex justify-between items-center flex-shrink-0">
+                <h2 class="text-2xl font-bold text-peks-blue">Nuevo Historial Clínico</h2>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <form id="historialForm" class="p-8 space-y-8 overflow-y-auto">
+                <!-- Formulario completo -->
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">1. Datos Personales</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <input type="text" name="direccionPaciente" placeholder="Dirección Wallet del Paciente (0x...)" required class="md:col-span-3 p-2 border rounded">
+                        <input type="text" name="nombre" placeholder="Nombre(s)" required class="p-2 border rounded">
+                        <input type="text" name="apellidos" placeholder="Apellidos" required class="p-2 border rounded">
+                        <input type="number" name="edad" placeholder="Edad" required class="p-2 border rounded">
+                        <select name="sexo" class="p-2 border rounded bg-white"><option>Sexo</option><option>Masculino</option><option>Femenino</option></select>
+                        <textarea name="alergias" placeholder="Alergias conocidas..." class="md:col-span-3 p-2 border rounded"></textarea>
+                    </div>
+                </fieldset>
+                
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">2. Antecedentes Familiares</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <textarea name="abuelosPaternos" placeholder="Abuelos Paternos..." class="p-2 border rounded h-24"></textarea>
+                        <textarea name="abuelosMaternos" placeholder="Abuelos Maternos..." class="p-2 border rounded h-24"></textarea>
+                        <textarea name="padre" placeholder="Padre..." class="p-2 border rounded h-24"></textarea>
+                        <textarea name="madre" placeholder="Madre..." class="p-2 border rounded h-24"></textarea>
+                        <textarea name="hermanos" placeholder="Hermanos..." class="md:col-span-2 p-2 border rounded h-24"></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">3. Signos Vitales y Síntomas</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                        <input type="text" name="peso" placeholder="Peso (kg)" class="p-2 border rounded">
+                        <input type="text" name="temperatura" placeholder="Temperatura (°C)" class="p-2 border rounded">
+                        <input type="text" name="oxigenacion" placeholder="Oxigenación (%)" class="p-2 border rounded">
+                        <input type="text" name="presion" placeholder="Presión Arterial" class="p-2 border rounded">
+                        <textarea name="sintomas" placeholder="Síntomas referidos por el paciente..." class="md:col-span-4 p-2 border rounded h-28"></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">4. Diagnóstico y Tratamiento</legend>
+                    <div class="grid grid-cols-1 gap-4 mt-4">
+                        <textarea name="diagnosticoMedico" placeholder="Diagnóstico Médico (incluir palabras clave como diabetes, hipertension, etc.)" class="p-2 border rounded h-28"></textarea>
+                        <textarea name="medicamentos" placeholder="Medicamentos y Tratamiento (Receta)..." class="p-2 border rounded h-28"></textarea>
+                    </div>
+                </fieldset>
+            </form>
+            <div class="p-6 border-t flex justify-end gap-4 flex-shrink-0">
+                <button id="cancelModalBtn" type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
+                    Cancelar
+                </button>
+                <button type="submit" form="historialForm" class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+                    Registrar en Blockchain
+                </button>
+            </div>
+            <div id="modalMessage" class="px-8 pb-4 text-center font-medium"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const gestorReportesAddress = "0xBC466c28Cf7fDdC0E27b83ec7B57E2366B5d8059";//Contrato de historial 
+        const gestorReportesABI = [
+            "function registrarReporte(address _paciente, string memory _reporteCifradoHash, bytes memory _palabrasClavePEKS)"
+        ];
+
+        // --- ELEMENTOS DEL DOM ---
+        const modal = document.getElementById('historialModal');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const historialForm = document.getElementById('historialForm');
+        const modalMessage = document.getElementById('modalMessage');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        // --- LÓGICA DEL MODAL (REGISTRO) ---
+        const showModal = () => modal.classList.remove('hidden');
+        const hideModal = () => modal.classList.add('hidden');
+
+        openModalBtn.addEventListener('click', showModal);
+        closeModalBtn.addEventListener('click', hideModal);
+        cancelModalBtn.addEventListener('click', hideModal);
+
+        historialForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            modalMessage.textContent = "Procesando datos...";
+            try {
+                const formData = new FormData(historialForm);
+                const historialData = Object.fromEntries(formData.entries());
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const hospitalAddress = await signer.getAddress();
+
+                const response = await fetch('/api/ingresar-historial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ historialData, hospitalAddress })
+                });
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message);
+                
+                modalMessage.textContent = "Datos procesados. Por favor, firma la transacción.";
+                const contract = new ethers.Contract(gestorReportesAddress, gestorReportesABI, signer);
+                const { paciente, ipfsHash, indicePEKS } = result.datosParaTransaccion;
+                const tx = await contract.registrarReporte(paciente, ipfsHash, indicePEKS);
+                
+                modalMessage.textContent = "Registrando en la blockchain...";
+                await tx.wait();
+
+                modalMessage.textContent = "¡Historial registrado exitosamente!";
+                modalMessage.className = "text-green-600";
+                historialForm.reset();
+                setTimeout(hideModal, 2000);
+            } catch (error) {
+                console.error("Error en el registro:", error);
+                modalMessage.textContent = `Error: ${error.message}`;
+                modalMessage.className = "text-red-600";
+            }
+        });
+
+        // --- LÓGICA DE BÚSQUEDA ---
+        const performSearch = async () => {
+            const keyword = searchInput.value.trim().toLowerCase();
+            if (!keyword) {
+                alert("Por favor, ingresa una palabra clave para buscar.");
+                return;
+            }
+            resultsContainer.innerHTML = '<p class="text-gray-500">Buscando...</p>';
+
+            try {
+                const response = await fetch('/api/buscar-hospital', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error en el servidor');
+                }
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.resultados.length === 0) {
+                        resultsContainer.innerHTML = '<p class="text-yellow-600 font-medium">No se encontraron resultados.</p>';
+                    } else {
+                        resultsContainer.innerHTML = `
+                            <p class="text-green-600 font-medium mb-4">Se encontraron ${data.resultados.length} resultados:</p>
+                            <ul class="text-left list-disc list-inside">
+                                ${data.resultados.map(res => `<li>Reporte ID: <strong>${res.id}</strong> (Hash: ${res.ipfsHash.substring(0, 12)}...)</li>`).join('')}
+                            </ul>
+                        `;
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error("Error en la búsqueda:", error);
+                resultsContainer.innerHTML = `<p class="text-red-600 font-medium">Error: ${error.message}</p>`;
+            }
+        };
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+    </script>
+</body>
+</html>

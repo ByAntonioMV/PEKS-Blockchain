@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'peks-blue': '#1e40af',
+                        'peks-light-blue': '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-peks-blue">Panel de Administrador</h1>
+            <p class="text-gray-600">Gestión de usuarios y entidades en la plataforma.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Columna de Registro de Usuario -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Registrar Nuevo Usuario</h2>
+                <form id="registerUserForm" class="space-y-4">
+                    <input type="text" id="userAddress" placeholder="Dirección de Wallet (0x...)" required class="w-full p-3 border rounded-lg">
+                    <input type="text" id="userName" placeholder="Nombre" required class="w-full p-3 border rounded-lg">
+                    <input type="text" id="userLastName" placeholder="Apellido" required class="w-full p-3 border rounded-lg">
+                    <input type="email" id="userEmail" placeholder="Correo Electrónico" required class="w-full p-3 border rounded-lg">
+                    <input type="text" id="userNationality" placeholder="Nacionalidad" required class="w-full p-3 border rounded-lg">
+                    <select id="userRole" required class="w-full p-3 border rounded-lg bg-white">
+                        <option value="1">Paciente</option>
+                        <option value="2">Investigador</option>
+                    </select>
+                    <button type="submit" class="w-full bg-peks-blue hover:bg-blue-800 text-white font-bold py-3 rounded-lg">
+                        Registrar Usuario
+                    </button>
+                </form>
+                <div id="userMessage" class="mt-4 text-center text-sm font-medium"></div>
+            </div>
+
+            <!-- Columna de Registro de Hospital (CORREGIDA) -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Registrar Nuevo Hospital</h2>
+                <p class="text-sm text-gray-500 mb-6">Inscribe una nueva institución médica en la plataforma.</p>
+                <form id="registerHospitalForm" class="space-y-4">
+                     <input type="text" id="hospitalAddress" placeholder="Dirección de Wallet del Hospital (0x...)" required class="w-full p-3 border rounded-lg">
+                     <input type="text" id="hospitalName" placeholder="Nombre del Hospital" required class="w-full p-3 border rounded-lg">
+                     <input type="text" id="hospitalId" placeholder="ID Oficial / Licencia" required class="w-full p-3 border rounded-lg">
+                     <input type="text" id="hospitalPhysicalAddress" placeholder="Dirección Física" required class="w-full p-3 border rounded-lg">
+                     <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        Registrar Hospital
+                    </button>
+                </form>
+                <div id="hospitalMessage" class="mt-4 text-center text-sm font-medium"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../js/Admistrador/IngresarEntidad.js"></script>
+
+</body>
+</html>

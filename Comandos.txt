@@ -6,5 +6,3 @@ npx hardhat compile
 
 Compilar los deploys
 npx hardhat run scripts/deploy.js --network ganache
-
-

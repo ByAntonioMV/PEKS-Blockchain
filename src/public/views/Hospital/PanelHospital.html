@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +20,7 @@
         }
     </script>
 </head>
+
 <body class="bg-gray-100 font-sans">
     <div class="container mx-auto p-4 md:p-8">
         <header class="mb-8 flex justify-between items-center">
@@ -30,15 +32,24 @@
         </header>
 
         <!-- Sección de Búsqueda y Acción con botón -->
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8 flex flex-col md:flex-row items-center gap-4">
+        <div
+            class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8 flex flex-col md:flex-row items-center gap-4">
             <div class="relative flex-grow w-full">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </div>
-                <input type="search" id="searchInput" placeholder="Buscar por palabra clave..." class="w-full p-4 pl-10 border rounded-lg">
+                <input type="search" id="searchInput" placeholder="Buscar por palabra clave..."
+                    class="w-full p-4 pl-10 border rounded-lg">
             </div>
-            <button id="searchBtn" class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">Buscar</button>
-            <button id="openModalBtn" class="bg-peks-blue hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">
+            <button id="searchBtn"
+                class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">Buscar</button>
+            <button id="openModalBtn"
+                class="bg-peks-blue hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">
                 Registrar Historial
             </button>
         </div>
@@ -46,8 +57,8 @@
         <!-- Resultados de Búsqueda -->
         <div>
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Resultados</h2>
-            <div id="resultsContainer" class="bg-white p-4 rounded-xl shadow-md border border-gray-200 text-center">
-                <p class="text-gray-500">Los resultados de la búsqueda aparecerán aquí.</p>
+            <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-gray-500 col-span-full text-center">Los resultados de la búsqueda aparecerán aquí.</p>
             </div>
         </div>
     </div>
@@ -64,23 +75,32 @@
                 <fieldset class="border p-4 rounded-lg">
                     <legend class="text-lg font-semibold text-gray-700 px-2">1. Datos Personales</legend>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <input type="text" name="direccionPaciente" placeholder="Dirección Wallet del Paciente (0x...)" required class="md:col-span-3 p-2 border rounded">
+                        <input type="text" name="direccionPaciente" placeholder="Dirección Wallet del Paciente (0x...)"
+                            required class="md:col-span-3 p-2 border rounded">
                         <input type="text" name="nombre" placeholder="Nombre(s)" required class="p-2 border rounded">
                         <input type="text" name="apellidos" placeholder="Apellidos" required class="p-2 border rounded">
                         <input type="number" name="edad" placeholder="Edad" required class="p-2 border rounded">
-                        <select name="sexo" class="p-2 border rounded bg-white"><option>Sexo</option><option>Masculino</option><option>Femenino</option></select>
-                        <textarea name="alergias" placeholder="Alergias conocidas..." class="md:col-span-3 p-2 border rounded"></textarea>
+                        <select name="sexo" class="p-2 border rounded bg-white">
+                            <option>Sexo</option>
+                            <option>Masculino</option>
+                            <option>Femenino</option>
+                        </select>
+                        <textarea name="alergias" placeholder="Alergias conocidas..."
+                            class="md:col-span-3 p-2 border rounded"></textarea>
                     </div>
                 </fieldset>
-                
+
                 <fieldset class="border p-4 rounded-lg">
                     <legend class="text-lg font-semibold text-gray-700 px-2">2. Antecedentes Familiares</legend>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <textarea name="abuelosPaternos" placeholder="Abuelos Paternos..." class="p-2 border rounded h-24"></textarea>
-                        <textarea name="abuelosMaternos" placeholder="Abuelos Maternos..." class="p-2 border rounded h-24"></textarea>
+                        <textarea name="abuelosPaternos" placeholder="Abuelos Paternos..."
+                            class="p-2 border rounded h-24"></textarea>
+                        <textarea name="abuelosMaternos" placeholder="Abuelos Maternos..."
+                            class="p-2 border rounded h-24"></textarea>
                         <textarea name="padre" placeholder="Padre..." class="p-2 border rounded h-24"></textarea>
                         <textarea name="madre" placeholder="Madre..." class="p-2 border rounded h-24"></textarea>
-                        <textarea name="hermanos" placeholder="Hermanos..." class="md:col-span-2 p-2 border rounded h-24"></textarea>
+                        <textarea name="hermanos" placeholder="Hermanos..."
+                            class="md:col-span-2 p-2 border rounded h-24"></textarea>
                     </div>
                 </fieldset>
 
@@ -91,23 +111,29 @@
                         <input type="text" name="temperatura" placeholder="Temperatura (°C)" class="p-2 border rounded">
                         <input type="text" name="oxigenacion" placeholder="Oxigenación (%)" class="p-2 border rounded">
                         <input type="text" name="presion" placeholder="Presión Arterial" class="p-2 border rounded">
-                        <textarea name="sintomas" placeholder="Síntomas referidos por el paciente..." class="md:col-span-4 p-2 border rounded h-28"></textarea>
+                        <textarea name="sintomas" placeholder="Síntomas referidos por el paciente..."
+                            class="md:col-span-4 p-2 border rounded h-28"></textarea>
                     </div>
                 </fieldset>
 
                 <fieldset class="border p-4 rounded-lg">
                     <legend class="text-lg font-semibold text-gray-700 px-2">4. Diagnóstico y Tratamiento</legend>
                     <div class="grid grid-cols-1 gap-4 mt-4">
-                        <textarea name="diagnosticoMedico" placeholder="Diagnóstico Médico (incluir palabras clave como diabetes, hipertension, etc.)" class="p-2 border rounded h-28"></textarea>
-                        <textarea name="medicamentos" placeholder="Medicamentos y Tratamiento (Receta)..." class="p-2 border rounded h-28"></textarea>
+                        <textarea name="diagnosticoMedico"
+                            placeholder="Diagnóstico Médico (incluir palabras clave como diabetes, hipertension, etc.)"
+                            class="p-2 border rounded h-28"></textarea>
+                        <textarea name="medicamentos" placeholder="Medicamentos y Tratamiento (Receta)..."
+                            class="p-2 border rounded h-28"></textarea>
                     </div>
                 </fieldset>
             </form>
             <div class="p-6 border-t flex justify-end gap-4 flex-shrink-0">
-                <button id="cancelModalBtn" type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
+                <button id="cancelModalBtn" type="button"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
                     Cancelar
                 </button>
-                <button type="submit" form="historialForm" class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+                <button type="submit" form="historialForm"
+                    class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
                     Registrar en Blockchain
                 </button>
             </div>
@@ -117,9 +143,9 @@
 
     <script>
         // --- CONFIGURACIÓN ---
-        const gestorReportesAddress = "0xBC466c28Cf7fDdC0E27b83ec7B57E2366B5d8059";//Contrato de historial 
+        const gestorReportesAddress = "0x57A8045f7DfDd7C6D5fB91270056525C7276A31e";
         const gestorReportesABI = [
-            "function registrarReporte(address _paciente, string memory _reporteCifradoHash, bytes memory _palabrasClavePEKS)"
+            "function registrarReporte(address _paciente, tuple(string nombre, uint edad, string sexo, string estadoCivil, string lugarNacimiento, string fechaNacimiento, string domicilio, string escolaridad, string ocupacion, string telefono, string religion, string tipoSangre, string alergias, tuple(string abuelosPaternos, string abuelosMaternos, string padre, string madre, string hermanos) antecedentesFamiliares, tuple(string fuma, string alcohol, string drogas, string farmacodependencia) antecedentesPersonales, tuple(string peso, string temperatura, string oxigenacion, string presion, string sintomas, string diagnosticoMedico, string medicamentos) consulta) memory _historial, bytes memory _palabrasClavePEKS)"
         ];
 
         // --- ELEMENTOS DEL DOM ---
@@ -143,29 +169,38 @@
 
         historialForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            modalMessage.textContent = "Procesando datos...";
+            modalMessage.textContent = "Generando índice de búsqueda...";
             try {
                 const formData = new FormData(historialForm);
-                const historialData = Object.fromEntries(formData.entries());
+                const data = Object.fromEntries(formData.entries());
+
+                const peksResponse = await fetch('/api/ingresar-historial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ historialData: data })
+                });
+                const peksResult = await peksResponse.json();
+                if (!peksResult.success) throw new Error(peksResult.message);
+
+                const { indicePEKS } = peksResult.datosParaTransaccion;
+                modalMessage.textContent = "Índice generado. Por favor, firma la transacción.";
+
+                const historial = {
+                    nombre: data.nombre || "", edad: parseInt(data.edad) || 0, sexo: data.sexo || "", estadoCivil: data.estadoCivil || "",
+                    lugarNacimiento: data.lugarNacimiento || "", fechaNacimiento: data.fechaNacimiento || "", domicilio: data.domicilio || "",
+                    escolaridad: data.escolaridad || "", ocupacion: data.ocupacion || "", telefono: data.telefono || "", religion: data.religion || "",
+                    tipoSangre: data.tipoSangre || "", alergias: data.alergias || "",
+                    antecedentesFamiliares: { abuelosPaternos: data.abuelosPaternos || "", abuelosMaternos: data.abuelosMaternos || "", padre: data.padre || "", madre: data.madre || "", hermanos: data.hermanos || "" },
+                    antecedentesPersonales: { fuma: data.fuma || "", alcohol: data.alcohol || "", drogas: data.drogas || "", farmacodependencia: data.farmacodependencia || "" },
+                    consulta: { peso: data.peso || "", temperatura: data.temperatura || "", oxigenacion: data.oxigenacion || "", presion: data.presion || "", sintomas: data.sintomas || "", diagnosticoMedico: data.diagnosticoMedico || "", medicamentos: data.medicamentos || "" }
+                };
 
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 const signer = provider.getSigner();
-                const hospitalAddress = await signer.getAddress();
-
-                const response = await fetch('/api/ingresar-historial', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ historialData, hospitalAddress })
-                });
-                const result = await response.json();
-                if (!result.success) throw new Error(result.message);
-                
-                modalMessage.textContent = "Datos procesados. Por favor, firma la transacción.";
                 const contract = new ethers.Contract(gestorReportesAddress, gestorReportesABI, signer);
-                const { paciente, ipfsHash, indicePEKS } = result.datosParaTransaccion;
-                const tx = await contract.registrarReporte(paciente, ipfsHash, indicePEKS);
-                
+
+                const tx = await contract.registrarReporte(data.direccionPaciente, historial, indicePEKS);
                 modalMessage.textContent = "Registrando en la blockchain...";
                 await tx.wait();
 
@@ -183,48 +218,57 @@
         // --- LÓGICA DE BÚSQUEDA ---
         const performSearch = async () => {
             const keyword = searchInput.value.trim().toLowerCase();
-            if (!keyword) {
-                alert("Por favor, ingresa una palabra clave para buscar.");
-                return;
-            }
-            resultsContainer.innerHTML = '<p class="text-gray-500">Buscando...</p>';
-
+            if (!keyword) return;
+            resultsContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center">Buscando...</p>';
             try {
                 const response = await fetch('/api/buscar-hospital', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ keyword })
                 });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Error en el servidor');
-                }
                 const data = await response.json();
-
                 if (data.success) {
                     if (data.resultados.length === 0) {
-                        resultsContainer.innerHTML = '<p class="text-yellow-600 font-medium">No se encontraron resultados.</p>';
+                        resultsContainer.innerHTML = '<p class="text-yellow-600 font-medium col-span-full text-center">No se encontraron resultados.</p>';
                     } else {
-                        resultsContainer.innerHTML = `
-                            <p class="text-green-600 font-medium mb-4">Se encontraron ${data.resultados.length} resultados:</p>
-                            <ul class="text-left list-disc list-inside">
-                                ${data.resultados.map(res => `<li>Reporte ID: <strong>${res.id}</strong> (Hash: ${res.ipfsHash.substring(0, 12)}...)</li>`).join('')}
-                            </ul>
-                        `;
+                        // --- CORRECCIÓN AQUÍ ---
+                        // Uso de optional chaining para evitar errores cuando consulta no existe
+                        resultsContainer.innerHTML = data.resultados.map(res => `
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-3">
+                            <div class="border-b pb-2">
+                                <p class="text-sm text-gray-500">Reporte ID: ${res.id}</p>
+                                <h3 class="text-xl font-bold text-peks-blue">${res.detalles.nombre || 'N/A'}</h3>
+                            </div>
+                            <div>
+                                <p><strong class="font-medium text-gray-600">Edad:</strong> ${res.detalles.edad || 'N/A'}</p>
+                                <p><strong class="font-medium text-gray-600">Sexo:</strong> ${res.detalles.sexo || 'N/A'}</p>
+                            </div>
+                            <div class="pt-2">
+                                <p class="font-medium text-gray-600">Diagnóstico Médico:</p>
+                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
+                                    ${res.detalles.consulta?.diagnosticoMedico || 'No especificado'}
+                                </p>
+                            </div>
+                            <div class="pt-2">
+                                <p class="font-medium text-gray-600">Receta / Medicamentos:</p>
+                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
+                                    ${res.detalles.consulta?.medicamentos || 'No especificado'}
+                                </p>
+                            </div>
+                        </div>
+                    `).join('');
                     }
-                } else {
-                    throw new Error(data.message);
-                }
+                } else { throw new Error(data.message); }
             } catch (error) {
                 console.error("Error en la búsqueda:", error);
-                resultsContainer.innerHTML = `<p class="text-red-600 font-medium">Error: ${error.message}</p>`;
+                resultsContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">${error.message}</p>`;
             }
         };
-
         searchBtn.addEventListener('click', performSearch);
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') performSearch();
         });
     </script>
 </body>
+
 </html>

@@ -1,31 +1,31 @@
-// Asegúrate de que esta sea la dirección de tu ÚLTIMO despliegue
-const contractAddress = "0x1A56D104E68F0697a74B17DC5c6A6BAa1F385cEc"; //Contrato de GestorEntidad
+// Dirección del contrato desplegado
+const contractAddress = "0x901d3b9532E9ef7AD2E1c95105B7Bb43D749baB8";
 const contractABI = [
     "function registrarUsuarioPorAdmin(address _direccionUsuario, string memory _nombre, string memory _apellido, string memory _nacionalidad, string memory _correo, uint8 _rol)",
-    "function registrarHospitalPorAdmin(address _direccionHospital, string memory _nombre, string memory _idOficial, string memory _direccionFisica)",
-    "function verificarHospital(address _direccionHospital, bool _estaVerificado)"
+    "function registrarMedicoPorAdmin(address _direccionMedico, string memory _nombre, string memory _idOficial, string memory _direccionFisica)"
 ];
 
 let signer;
 let contract;
 
-// Función para inicializar signer y contract de forma segura
+// --- Inicializa signer y contrato ---
 async function getContractWithSigner() {
-    if (typeof window.ethereum === 'undefined') {
-        throw new Error("MetaMask no está instalado.");
-    }
-    if (contract && signer) return contract; // Evita reconectar innecesariamente
+    if (typeof window.ethereum === 'undefined') throw new Error("MetaMask no está instalado.");
+
+    if (contract && signer) return contract;
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     contract = new ethers.Contract(contractAddress, contractABI, signer);
+
     return contract;
 }
 
-// --- LÓGICA DE REGISTRO DE USUARIO ---
+// --- Lógica de registro ---
 const userForm = document.getElementById('registerUserForm');
 const userMessage = document.getElementById('userMessage');
+
 userForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
@@ -37,52 +37,55 @@ userForm.addEventListener('submit', async (e) => {
         const apellido = document.getElementById('userLastName').value;
         const correo = document.getElementById('userEmail').value;
         const nacionalidad = document.getElementById('userNationality').value;
-        const rol = document.getElementById('userRole').value;
+        const rol = parseInt(document.getElementById('userRole').value); // 1=Paciente,2=Investigador,3=Médico
+
+        console.log("📤 Datos a enviar ->", { address, nombre, apellido, correo, nacionalidad, rol });
 
         userMessage.textContent = "Por favor, firma la transacción en MetaMask.";
-        const tx = await contractInstance.registrarUsuarioPorAdmin(address, nombre, apellido, nacionalidad, correo, rol);
 
+        let tx;
+        if (rol === 3) {
+            // Registrar médico
+            const idOficial = prompt("Ingresa la cedula del médico:");
+            const direccionFisica = prompt("Ingresa dirección física del médico:");
+            tx = await contractInstance.registrarMedicoPorAdmin(address, nombre, idOficial, direccionFisica);
+        } else {
+            // Registrar paciente o investigador
+            tx = await contractInstance.registrarUsuarioPorAdmin(address, nombre, apellido, nacionalidad, correo, rol);
+        }
+
+        console.log("⏳ Hash de transacción:", tx.hash);
         userMessage.textContent = "Procesando registro en la blockchain...";
         await tx.wait();
 
+        console.log("✅ Transacción confirmada:", tx);
+
+        if (rol === 1) {
+            // Generar JWT para paciente
+            const response = await fetch('/api/generar-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, nombre })
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem("jwt_paciente", data.token);
+                console.log("🔑 Token JWT generado:", data.token); // <-- Agregado
+                userMessage.textContent = `¡Paciente registrado exitosamente! Token generado.`;
+            } else {
+                console.log("⚠️ Error al generar token:", data); // <-- opcional, para debug
+                userMessage.textContent = `Paciente registrado, pero no se pudo generar el token.`;
+            }
+        }
+
         userMessage.className = "text-green-600";
-        userMessage.textContent = `¡Usuario registrado exitosamente!`;
         userForm.reset();
+
     } catch (error) {
-        console.error("Error al registrar usuario:", error);
+        console.error("❌ Error al registrar usuario:", error);
         userMessage.className = "text-red-600";
-        userMessage.textContent = error.message.includes("MetaMask") ? error.message : "Error: La dirección ya podría estar registrada o la transacción fue rechazada.";
-    }
-});
-
-// --- LÓGICA DE REGISTRO DE HOSPITAL (CORREGIDA) ---
-const hospitalForm = document.getElementById('registerHospitalForm');
-const hospitalMessage = document.getElementById('hospitalMessage');
-hospitalForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    try {
-        const contractInstance = await getContractWithSigner();
-        hospitalMessage.textContent = "Preparando transacción...";
-
-        const address = document.getElementById('hospitalAddress').value;
-        const name = document.getElementById('hospitalName').value;
-        const id = document.getElementById('hospitalId').value;
-        const physicalAddress = document.getElementById('hospitalPhysicalAddress').value;
-
-        hospitalMessage.textContent = "Por favor, firma la transacción en MetaMask.";
-
-        const tx = await contractInstance.registrarHospitalPorAdmin(address, name, id, physicalAddress);
-
-        hospitalMessage.textContent = "Procesando registro en la blockchain...";
-        await tx.wait();
-
-        hospitalMessage.className = "text-green-600";
-        hospitalMessage.textContent = `¡Hospital registrado exitosamente!`;
-        hospitalForm.reset();
-
-    } catch (error) {
-        console.error("Error al registrar hospital:", error);
-        hospitalMessage.className = "text-red-600";
-        hospitalMessage.textContent = error.message.includes("MetaMask") ? error.message : "Error: La dirección ya podría estar registrada o la transacción fue rechazada.";
+        userMessage.textContent = error.message.includes("MetaMask")
+            ? error.message
+            : "Error: La dirección ya podría estar registrada o la transacción fue rechazada.";
     }
 });

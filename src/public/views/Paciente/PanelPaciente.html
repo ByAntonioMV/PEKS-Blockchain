@@ -1,11 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Panel de Paciente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'peks-blue': '#1e40af',
+                        'peks-light-blue': '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    Panel Usuario
+
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold text-peks-blue">Portal del Paciente</h1>
+                <p class="text-gray-600">Consulta y añade tus auto-reportes de salud.</p>
+            </div>
+            <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Cerrar Sesión</button>
+        </header>
+
+        <!-- Sección de Acción -->
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8 text-center">
+            <button id="openModalBtn"
+                class="bg-peks-blue hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg text-lg">
+                Añadir Nuevo Auto-Reporte
+            </button>
+        </div>
+
+        <!-- Mis Reportes -->
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Mis Reportes</h2>
+            <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-gray-500 col-span-full text-center">Tus historiales médicos aparecerán aquí.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para el Formulario de Auto-Reporte -->
+    <div id="historialModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b flex justify-between items-center flex-shrink-0">
+                <h2 class="text-2xl font-bold text-peks-blue">Nuevo Auto-Reporte de Salud</h2>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <form id="historialForm" class="p-8 space-y-8 overflow-y-auto">
+                <!-- Formulario Corregido -->
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">1. Datos Personales</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <input type="text" name="nombre" placeholder="Nombre(s)" required class="p-2 border rounded">
+                        <input type="text" name="apellidos" placeholder="Apellidos" required class="p-2 border rounded">
+                        <input type="number" name="edad" placeholder="Edad" required class="p-2 border rounded">
+                        <select name="sexo" class="p-2 border rounded bg-white">
+                            <option value="">Sexo</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                        </select>
+                        <textarea name="alergias" placeholder="Alergias conocidas..."
+                            class="md:col-span-3 p-2 border rounded"></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">2. Signos Vitales y Síntomas</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                        <input type="text" name="peso" placeholder="Peso (kg)" class="p-2 border rounded">
+                        <input type="text" name="temperatura" placeholder="Temperatura (°C)" class="p-2 border rounded">
+                        <input type="text" name="oxigenacion" placeholder="Oxigenación (%)" class="p-2 border rounded">
+                        <input type="text" name="presion" placeholder="Presión Arterial" class="p-2 border rounded">
+                        <textarea name="sintomas" placeholder="Síntomas que presentas..."
+                            class="md:col-span-4 p-2 border rounded h-28"></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset class="border p-4 rounded-lg">
+                    <legend class="text-lg font-semibold text-gray-700 px-2">3. Diagnóstico y Tratamiento</legend>
+                    <div class="grid grid-cols-1 gap-4 mt-4">
+                        <textarea name="diagnosticoMedico"
+                            placeholder="Diagnóstico (si lo conoces, ej: covid, diabetes)"
+                            class="p-2 border rounded h-28"></textarea>
+                        <textarea name="medicamentos" placeholder="Medicamentos que estás tomando"
+                            class="p-2 border rounded h-28"></textarea>
+                    </div>
+                </fieldset>
+            </form>
+            <div class="p-6 border-t flex justify-end gap-4 flex-shrink-0">
+                <button id="cancelModalBtn" type="button"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
+                    Cancelar
+                </button>
+                <button type="submit" form="historialForm"
+                    class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+                    Guardar en Blockchain
+                </button>
+            </div>
+            <div id="modalMessage" class="px-8 pb-4 text-center font-medium"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const gestorReportesAddress = "0xB742C5D4374EB76C9DA8465a5B420fBA5D678f18"; // Dirección del contrato
+        const gestorReportesABI = [
+            "function registrarAutoReporte(string memory _reporteCifradoHash, bytes memory _palabrasClavePEKS)"
+        ];
+
+        // --- ELEMENTOS DEL DOM ---
+        const modal = document.getElementById('historialModal');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const historialForm = document.getElementById('historialForm');
+        const modalMessage = document.getElementById('modalMessage');
+
+        // --- LÓGICA DEL MODAL ---
+        const showModal = () => modal.classList.remove('hidden');
+        const hideModal = () => modal.classList.add('hidden');
+
+        openModalBtn.addEventListener('click', showModal);
+        closeModalBtn.addEventListener('click', hideModal);
+        cancelModalBtn.addEventListener('click', hideModal);
+
+        // --- LÓGICA DE ENVÍO DEL FORMULARIO ---
+        historialForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            modalMessage.textContent = "Procesando datos...";
+            modalMessage.className = "text-gray-600";
+
+            try {
+                const formData = new FormData(historialForm);
+                const historialData = Object.fromEntries(formData.entries());
+
+                // Completar todos los campos requeridos por el contrato
+                const historialDataCompleto = {
+                    nombre: historialData.nombre || "",
+                    apellidos: historialData.apellidos || "",
+                    edad: parseInt(historialData.edad) || 0,
+                    sexo: historialData.sexo || "",
+                    alergias: historialData.alergias || "",
+                    antecedentesFamiliares: {
+                        abuelosPaternos: "",
+                        abuelosMaternos: "",
+                        padre: "",
+                        madre: "",
+                        hermanos: ""
+                    },
+                    consulta: {
+                        peso: historialData.peso || "",
+                        temperatura: historialData.temperatura || "",
+                        oxigenacion: historialData.oxigenacion || "",
+                        presion: historialData.presion || "",
+                        sintomas: historialData.sintomas || "",
+                        diagnosticoMedico: historialData.diagnosticoMedico || "",
+                        medicamentos: historialData.medicamentos || ""
+                    }
+                };
+
+                // Obtener la dirección del paciente que está conectado
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const pacienteAddress = await signer.getAddress();
+
+                // Llamar al backend para subir los datos a IPFS y generar índice PEKS
+                const response = await fetch('/api/ingresar-paciente', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ historialData: historialDataCompleto, pacienteAddress })
+                });
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message || "Error en el backend");
+
+                modalMessage.textContent = "Datos procesados. Por favor, firma la transacción.";
+
+                const { ipfsHash, indicePEKS } = result.datosParaTransaccion;
+
+                // Preparar contrato
+                const contract = new ethers.Contract(gestorReportesAddress, gestorReportesABI, signer);
+
+                // Convertir índice PEKS a bytes
+                const indiceBytes = ethers.utils.toUtf8Bytes(indicePEKS || "");
+
+                // Enviar transacción
+                let tx = await contract.registrarAutoReporte(ipfsHash, indiceBytes);
+                modalMessage.textContent = "Guardando tu reporte en la blockchain...";
+                await tx.wait();
+
+                modalMessage.textContent = "¡Auto-Reporte guardado exitosamente!";
+                modalMessage.className = "text-green-600";
+                historialForm.reset();
+                setTimeout(hideModal, 2000);
+
+            } catch (error) {
+                console.error("Error al guardar el auto-reporte:", error);
+                modalMessage.textContent = `Error: ${error.message}`;
+                modalMessage.className = "text-red-600";
+            }
+        });
+    </script>
 </body>
 </html>

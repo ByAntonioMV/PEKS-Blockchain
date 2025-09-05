@@ -4,6 +4,7 @@ const path = require('path');
 const app = express();
 const port = 3801;
 
+app.use(express.json());
 // Importación de las vistas de rutas
 const viewRoutes = require("./src/server/routes/Views/ViewsRoutes");
 
@@ -11,14 +12,16 @@ const viewRoutes = require("./src/server/routes/Views/ViewsRoutes");
 const autenticacionRoutes = require('./src/server/routes/Autenticacion/AutenticacionRoute');
 const ingresarHistorialRoute = require('./src/server/routes/Hospital/IngresarHistorialRoute')
 const BuscarHospitalRoute = require('./src/server/routes/Hospital/BuscarRoute')
-const ReporteRoute = require('./src/server/config/ReportesRoute')
+const ingresarHistorialPacienteRoute = require('./src/server/routes/Paciente/historialPacienteRoute')
+const Token = require('./src/server/routes/Token/tokenRoute')
 //*****Fin rutas de funcionamiento****//
 
 //******************Rutas Api*******************//
 app.use('/api', autenticacionRoutes);
 app.use('/api', ingresarHistorialRoute);
 app.use('/api', BuscarHospitalRoute);
-app.use('/api', ReporteRoute);
+app.use('/api', ingresarHistorialPacienteRoute);
+app.use('/api', Token);
 //**************Fin de rutas Api***************//
 
 // Servir archivos estáticos desde la carpeta correcta: "src/public"

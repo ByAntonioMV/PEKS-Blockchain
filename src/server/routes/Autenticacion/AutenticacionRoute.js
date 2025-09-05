@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const { ethers } = require("ethers");
 
 const router = express.Router();
@@ -29,7 +28,7 @@ router.post('/autenticar', express.json(), async (req, res) => {
 
         let responsePayload = { success: true, role: "NINGUNO", message: "La cuenta no está registrada." };
 
-        // Usamos un switch para manejar cada rol
+        // Manejo de roles actualizado
         switch (userRole) {
             case 1: // PACIENTE
                 console.log("Rol de Paciente confirmado.");
@@ -39,9 +38,9 @@ router.post('/autenticar', express.json(), async (req, res) => {
                 console.log("Rol de Investigador confirmado.");
                 responsePayload = { success: true, role: "INVESTIGADOR", redirectUrl: `/panelInvestigador?address=${userAddress}` };
                 break;
-            case 3: // HOSPITAL
-                 console.log("Rol de Hospital confirmado.");
-                responsePayload = { success: true, role: "HOSPITAL", redirectUrl: `/PanelHospital?address=${userAddress}` };
+            case 3: // MÉDICO
+                console.log("Rol de Médico confirmado.");
+                responsePayload = { success: true, role: "MEDICO", redirectUrl: `/PanelHospital?address=${userAddress}` };
                 break;
             case 4: // ADMIN
                 console.log("Rol de Administrador confirmado.");

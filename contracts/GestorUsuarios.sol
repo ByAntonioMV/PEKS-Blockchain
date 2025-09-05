@@ -3,12 +3,12 @@ pragma solidity ^0.8.28;
 
 /**
  * @title GestorUsuarios
- * @dev Contrato final con funciones de administrador para registrar usuarios y hospitales.
+ * @dev Contrato final con funciones de administrador para registrar usuarios y médicos.
  */
 contract GestorUsuarios { 
 
     // --- ESTRUCTURAS DE DATOS ---
-    enum Rol { NINGUNO, PACIENTE, INVESTIGADOR, HOSPITAL, ADMIN }
+    enum Rol { NINGUNO, PACIENTE, INVESTIGADOR, MEDICO, ADMIN }
 
     struct Usuario {
         string nombre;
@@ -18,7 +18,7 @@ contract GestorUsuarios {
         bool estaRegistrado;
     }
 
-    struct Hospital {
+    struct Medico {
         string nombre;
         string idOficial;
         string direccionFisica;
@@ -30,11 +30,11 @@ contract GestorUsuarios {
     address public propietario;
     mapping(address => Rol) public roles;
     mapping(address => Usuario) public usuarios;
-    mapping(address => Hospital) public hospitales;
+    mapping(address => Medico) public medicos;
 
     // --- EVENTOS ---
     event EntidadRegistrada(address indexed direccionEntidad, Rol rol, string nombre);
-    event HospitalVerificado(address indexed direccionHospital, bool estaVerificado);
+    event MedicoVerificado(address indexed direccionMedico, bool estaVerificado);
 
     // --- MODIFICADORES ---
     modifier soloPropietario() {
@@ -64,15 +64,15 @@ contract GestorUsuarios {
         emit EntidadRegistrada(msg.sender, _rol, string.concat(_nombre, " ", _apellido));
     }
     
-    function registrarHospital(
+    function registrarMedico(
         string memory _nombre,
         string memory _idOficial,
         string memory _direccionFisica
     ) public {
         require(roles[msg.sender] == Rol.NINGUNO, "La direccion ya esta registrada");
-        roles[msg.sender] = Rol.HOSPITAL;
-        hospitales[msg.sender] = Hospital(_nombre, _idOficial, _direccionFisica, true, false);
-        emit EntidadRegistrada(msg.sender, Rol.HOSPITAL, _nombre);
+        roles[msg.sender] = Rol.MEDICO;
+        medicos[msg.sender] = Medico(_nombre, _idOficial, _direccionFisica, true, false);
+        emit EntidadRegistrada(msg.sender, Rol.MEDICO, _nombre);
     }
 
     // --- FUNCIONES DE ADMINISTRADOR ---
@@ -92,24 +92,24 @@ contract GestorUsuarios {
     }
 
     /**
-     * @dev NUEVA FUNCIÓN: Permite al admin registrar un hospital con todos sus datos.
+     * @dev NUEVA FUNCIÓN: Permite al admin registrar un médico con todos sus datos.
      */
-    function registrarHospitalPorAdmin(
-        address _direccionHospital,
+    function registrarMedicoPorAdmin(
+        address _direccionMedico,
         string memory _nombre,
         string memory _idOficial,
         string memory _direccionFisica
     ) public soloPropietario {
-        require(roles[_direccionHospital] == Rol.NINGUNO, "La direccion del hospital ya esta registrada");
-        roles[_direccionHospital] = Rol.HOSPITAL;
-        hospitales[_direccionHospital] = Hospital(_nombre, _idOficial, _direccionFisica, true, false);
-        emit EntidadRegistrada(_direccionHospital, Rol.HOSPITAL, _nombre);
+        require(roles[_direccionMedico] == Rol.NINGUNO, "La direccion del medico ya esta registrada");
+        roles[_direccionMedico] = Rol.MEDICO;
+        medicos[_direccionMedico] = Medico(_nombre, _idOficial, _direccionFisica, true, false);
+        emit EntidadRegistrada(_direccionMedico, Rol.MEDICO, _nombre);
     }
 
-    function verificarHospital(address _direccionHospital, bool _estaVerificado) public soloPropietario {
-        require(roles[_direccionHospital] == Rol.HOSPITAL, "La direccion no es de un hospital");
-        hospitales[_direccionHospital].estaVerificado = _estaVerificado;
-        emit HospitalVerificado(_direccionHospital, _estaVerificado);
+    function verificarMedico(address _direccionMedico, bool _estaVerificado) public soloPropietario {
+        require(roles[_direccionMedico] == Rol.MEDICO, "La direccion no es de un medico");
+        medicos[_direccionMedico].estaVerificado = _estaVerificado;
+        emit MedicoVerificado(_direccionMedico, _estaVerificado);
     }
 
     // --- FUNCIONES DE LECTURA (GETTERS) ---

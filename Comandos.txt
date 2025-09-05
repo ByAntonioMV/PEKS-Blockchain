@@ -5,4 +5,5 @@ Compilar el contrato inteligente
 npx hardhat compile
 
 Compilar los deploys
-npx hardhat run scripts/deploy.js --network ganache
+npx hardhat run scripts/GestorUsuarioDeploy.js --network ganache
+npx hardhat run scripts/GestorReportesMedicosDeploy.js --network ganache

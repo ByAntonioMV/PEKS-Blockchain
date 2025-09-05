@@ -126,6 +126,11 @@
                             class="p-2 border rounded h-28"></textarea>
                     </div>
                 </fieldset>
+
+                <!-- 🔹 Campos ocultos para autenticación mutua -->
+                <input type="hidden" name="clavePublicaPaciente" id="clavePublicaPaciente">
+                <input type="hidden" name="jwtPaciente" id="jwtPaciente">
+                
             </form>
             <div class="p-6 border-t flex justify-end gap-4 flex-shrink-0">
                 <button id="cancelModalBtn" type="button"
@@ -141,134 +146,7 @@
         </div>
     </div>
 
-    <script>
-        // --- CONFIGURACIÓN ---
-        const gestorReportesAddress = "0x57A8045f7DfDd7C6D5fB91270056525C7276A31e";
-        const gestorReportesABI = [
-            "function registrarReporte(address _paciente, tuple(string nombre, uint edad, string sexo, string estadoCivil, string lugarNacimiento, string fechaNacimiento, string domicilio, string escolaridad, string ocupacion, string telefono, string religion, string tipoSangre, string alergias, tuple(string abuelosPaternos, string abuelosMaternos, string padre, string madre, string hermanos) antecedentesFamiliares, tuple(string fuma, string alcohol, string drogas, string farmacodependencia) antecedentesPersonales, tuple(string peso, string temperatura, string oxigenacion, string presion, string sintomas, string diagnosticoMedico, string medicamentos) consulta) memory _historial, bytes memory _palabrasClavePEKS)"
-        ];
-
-        // --- ELEMENTOS DEL DOM ---
-        const modal = document.getElementById('historialModal');
-        const openModalBtn = document.getElementById('openModalBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
-        const historialForm = document.getElementById('historialForm');
-        const modalMessage = document.getElementById('modalMessage');
-        const searchBtn = document.getElementById('searchBtn');
-        const searchInput = document.getElementById('searchInput');
-        const resultsContainer = document.getElementById('resultsContainer');
-
-        // --- LÓGICA DEL MODAL (REGISTRO) ---
-        const showModal = () => modal.classList.remove('hidden');
-        const hideModal = () => modal.classList.add('hidden');
-
-        openModalBtn.addEventListener('click', showModal);
-        closeModalBtn.addEventListener('click', hideModal);
-        cancelModalBtn.addEventListener('click', hideModal);
-
-        historialForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            modalMessage.textContent = "Generando índice de búsqueda...";
-            try {
-                const formData = new FormData(historialForm);
-                const data = Object.fromEntries(formData.entries());
-
-                const peksResponse = await fetch('/api/ingresar-historial', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ historialData: data })
-                });
-                const peksResult = await peksResponse.json();
-                if (!peksResult.success) throw new Error(peksResult.message);
-
-                const { indicePEKS } = peksResult.datosParaTransaccion;
-                modalMessage.textContent = "Índice generado. Por favor, firma la transacción.";
-
-                const historial = {
-                    nombre: data.nombre || "", edad: parseInt(data.edad) || 0, sexo: data.sexo || "", estadoCivil: data.estadoCivil || "",
-                    lugarNacimiento: data.lugarNacimiento || "", fechaNacimiento: data.fechaNacimiento || "", domicilio: data.domicilio || "",
-                    escolaridad: data.escolaridad || "", ocupacion: data.ocupacion || "", telefono: data.telefono || "", religion: data.religion || "",
-                    tipoSangre: data.tipoSangre || "", alergias: data.alergias || "",
-                    antecedentesFamiliares: { abuelosPaternos: data.abuelosPaternos || "", abuelosMaternos: data.abuelosMaternos || "", padre: data.padre || "", madre: data.madre || "", hermanos: data.hermanos || "" },
-                    antecedentesPersonales: { fuma: data.fuma || "", alcohol: data.alcohol || "", drogas: data.drogas || "", farmacodependencia: data.farmacodependencia || "" },
-                    consulta: { peso: data.peso || "", temperatura: data.temperatura || "", oxigenacion: data.oxigenacion || "", presion: data.presion || "", sintomas: data.sintomas || "", diagnosticoMedico: data.diagnosticoMedico || "", medicamentos: data.medicamentos || "" }
-                };
-
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(gestorReportesAddress, gestorReportesABI, signer);
-
-                const tx = await contract.registrarReporte(data.direccionPaciente, historial, indicePEKS);
-                modalMessage.textContent = "Registrando en la blockchain...";
-                await tx.wait();
-
-                modalMessage.textContent = "¡Historial registrado exitosamente!";
-                modalMessage.className = "text-green-600";
-                historialForm.reset();
-                setTimeout(hideModal, 2000);
-            } catch (error) {
-                console.error("Error en el registro:", error);
-                modalMessage.textContent = `Error: ${error.message}`;
-                modalMessage.className = "text-red-600";
-            }
-        });
-
-        // --- LÓGICA DE BÚSQUEDA ---
-        const performSearch = async () => {
-            const keyword = searchInput.value.trim().toLowerCase();
-            if (!keyword) return;
-            resultsContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center">Buscando...</p>';
-            try {
-                const response = await fetch('/api/buscar-hospital', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ keyword })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    if (data.resultados.length === 0) {
-                        resultsContainer.innerHTML = '<p class="text-yellow-600 font-medium col-span-full text-center">No se encontraron resultados.</p>';
-                    } else {
-                        // --- CORRECCIÓN AQUÍ ---
-                        // Uso de optional chaining para evitar errores cuando consulta no existe
-                        resultsContainer.innerHTML = data.resultados.map(res => `
-                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-3">
-                            <div class="border-b pb-2">
-                                <p class="text-sm text-gray-500">Reporte ID: ${res.id}</p>
-                                <h3 class="text-xl font-bold text-peks-blue">${res.detalles.nombre || 'N/A'}</h3>
-                            </div>
-                            <div>
-                                <p><strong class="font-medium text-gray-600">Edad:</strong> ${res.detalles.edad || 'N/A'}</p>
-                                <p><strong class="font-medium text-gray-600">Sexo:</strong> ${res.detalles.sexo || 'N/A'}</p>
-                            </div>
-                            <div class="pt-2">
-                                <p class="font-medium text-gray-600">Diagnóstico Médico:</p>
-                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
-                                    ${res.detalles.consulta?.diagnosticoMedico || 'No especificado'}
-                                </p>
-                            </div>
-                            <div class="pt-2">
-                                <p class="font-medium text-gray-600">Receta / Medicamentos:</p>
-                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
-                                    ${res.detalles.consulta?.medicamentos || 'No especificado'}
-                                </p>
-                            </div>
-                        </div>
-                    `).join('');
-                    }
-                } else { throw new Error(data.message); }
-            } catch (error) {
-                console.error("Error en la búsqueda:", error);
-                resultsContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">${error.message}</p>`;
-            }
-        };
-        searchBtn.addEventListener('click', performSearch);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
-    </script>
+    <script src="../../js/Hospital/RegistrarHistotial.js"></script>
 </body>
 
 </html>

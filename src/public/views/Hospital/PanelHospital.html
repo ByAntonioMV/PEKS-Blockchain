@@ -25,7 +25,7 @@
     <div class="container mx-auto p-4 md:p-8">
         <header class="mb-8 flex justify-between items-center">
             <div>
-                <h1 class="text-4xl font-bold text-peks-blue">Portal del Hospital</h1>
+                <h1 class="text-4xl font-bold text-peks-blue">Portal del Medico</h1>
                 <p class="text-gray-600">Gestión de historiales clínicos de pacientes.</p>
             </div>
             <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Cerrar Sesión</button>
@@ -34,6 +34,16 @@
         <!-- Sección de Búsqueda y Acción con botón -->
         <div
             class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8 flex flex-col md:flex-row items-center gap-4">
+
+            <!-- Campo para Token 
+            <div class="relative flex-grow w-full">
+                <label for="tokenInput" class="block text-sm font-medium text-gray-600 mb-1">Token de
+                    Autenticación</label>
+                <input type="text" id="tokenInput" placeholder="Pega tu token JWT aquí..."
+                    class="w-full p-4 border rounded-lg">
+            </div> -->
+
+            <!-- Campo de búsqueda -->
             <div class="relative flex-grow w-full">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -46,8 +56,12 @@
                 <input type="search" id="searchInput" placeholder="Buscar por palabra clave..."
                     class="w-full p-4 pl-10 border rounded-lg">
             </div>
+
+            <!-- Botones -->
             <button id="searchBtn"
-                class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">Buscar</button>
+                class="bg-peks-light-blue hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">
+                Buscar
+            </button>
             <button id="openModalBtn"
                 class="bg-peks-blue hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto">
                 Registrar Historial
@@ -75,6 +89,8 @@
                 <fieldset class="border p-4 rounded-lg">
                     <legend class="text-lg font-semibold text-gray-700 px-2">1. Datos Personales</legend>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <input type="text" id="jwtPaciente" name="jwtPaciente" placeholder="Token del paciente (JWT)"
+                            required class="md:col-span-3 p-2 border rounded">
                         <input type="text" name="direccionPaciente" placeholder="Dirección Wallet del Paciente (0x...)"
                             required class="md:col-span-3 p-2 border rounded">
                         <input type="text" name="nombre" placeholder="Nombre(s)" required class="p-2 border rounded">
@@ -128,9 +144,10 @@
                 </fieldset>
 
                 <!-- 🔹 Campos ocultos para autenticación mutua -->
-                <input type="hidden" name="clavePublicaPaciente" id="clavePublicaPaciente">
-                <input type="hidden" name="jwtPaciente" id="jwtPaciente">
-                
+                <input type="hidden" id="clavePublicaPaciente">
+                <input type="hidden" id="clavePrivadaCifrada">
+                <input type="hidden" id="ivSesion">
+
             </form>
             <div class="p-6 border-t flex justify-end gap-4 flex-shrink-0">
                 <button id="cancelModalBtn" type="button"

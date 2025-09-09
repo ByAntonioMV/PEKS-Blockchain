@@ -1,5 +1,5 @@
 // --- CONFIGURACIÓN ---
-const gestorReportesAddress = "0xB742C5D4374EB76C9DA8465a5B420fBA5D678f18";
+const gestorReportesAddress = "0x36082FdADc2fB368b68eF7a7459f1C0Dde2521AF";
 const gestorReportesABI = [
     "function registrarReporte(address _paciente, tuple(string nombre, string apellidos, uint edad, string sexo, string alergias, tuple(string abuelosPaternos, string abuelosMaternos, string padre, string madre, string hermanos) antecedentesFamiliares, tuple(string peso, string temperatura, string oxigenacion, string presion, string sintomas, string diagnosticoMedico, string medicamentos) consulta) memory _historial, bytes memory _palabrasClavePEKS)"
 ];
@@ -14,6 +14,7 @@ const modalMessage = document.getElementById('modalMessage');
 const searchBtn = document.getElementById('searchBtn');
 const searchInput = document.getElementById('searchInput');
 const resultsContainer = document.getElementById('resultsContainer');
+
 
 // --- LÓGICA DEL MODAL (REGISTRO) ---
 const showModal = () => modal.classList.remove('hidden');
@@ -31,20 +32,52 @@ historialForm.addEventListener('submit', async (e) => {
         const formData = new FormData(historialForm);
         const data = Object.fromEntries(formData.entries());
 
-        // 🔹 Generar par de claves ECDH para autenticación mutua
-        const keyPair = await window.crypto.subtle.generateKey(
+        // --- 🔹 Generar par de claves ECDH para autenticación mutua ---
+        const keyPairPaciente = await window.crypto.subtle.generateKey(
             { name: "ECDH", namedCurve: "P-256" },
             true,
             ["deriveKey", "deriveBits"]
         );
-        const publicKey = await window.crypto.subtle.exportKey("raw", keyPair.publicKey);
-        document.getElementById('clavePublicaPaciente').value = btoa(String.fromCharCode(...new Uint8Array(publicKey)));
+        const publicKeyPaciente = await window.crypto.subtle.exportKey("raw", keyPairPaciente.publicKey);
+        document.getElementById('clavePublicaPaciente').value =
+            btoa(String.fromCharCode(...new Uint8Array(publicKeyPaciente)));
 
-        // 🔹 Opcional: incluir JWT del paciente si ya existe
-        const jwt = localStorage.getItem('jwt_paciente') || '';
-        document.getElementById('jwtPaciente').value = jwt;
+        // --- 🔹 Generar JWT del paciente si existe ---
+        const jwt = data.jwtPaciente || '';
 
-        // 🔹 Generar índice PEKS en backend
+        // --- 🔹 Simulación de intercambio de clave de sesión (AES-GCM) ---
+        // Generamos clave de sesión local
+        const claveSesion = crypto.getRandomValues(new Uint8Array(32));
+
+        // Ejemplo: clave privada del paciente (simulada)
+        const clavePrivadaPaciente = await window.crypto.subtle.exportKey("pkcs8", keyPairPaciente.privateKey);
+        const encoder = new TextEncoder();
+        const dataPrivada = encoder.encode(clavePrivadaPaciente);
+
+        // Importar clave de sesión AES
+        const cryptoKeySesion = await crypto.subtle.importKey(
+            "raw",
+            claveSesion,
+            "AES-GCM",
+            false,
+            ["encrypt", "decrypt"]
+        );
+
+        // Generar IV y cifrar clave privada
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encryptedPrivada = await crypto.subtle.encrypt(
+            { name: "AES-GCM", iv },
+            cryptoKeySesion,
+            dataPrivada
+        );
+
+        // --- 🔹 Guardamos valores en campos ocultos separados ---
+        document.getElementById('clavePrivadaCifrada').value =
+            btoa(String.fromCharCode(...new Uint8Array(encryptedPrivada)));
+        document.getElementById('ivSesion').value =
+            btoa(String.fromCharCode(...iv));
+
+        // --- 🔹 Generar índice PEKS en backend ---
         const peksResponse = await fetch('/api/ingresar-historial', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -56,7 +89,7 @@ historialForm.addEventListener('submit', async (e) => {
         const { indicePEKS } = peksResult.datosParaTransaccion;
         modalMessage.textContent = "Índice generado. Por favor, firma la transacción.";
 
-        // 🔹 Construcción del historial adaptado al contrato
+        // --- 🔹 Construcción del historial adaptado al contrato ---
         const historial = {
             nombre: data.nombre || "",
             apellidos: data.apellidos || "",
@@ -81,13 +114,13 @@ historialForm.addEventListener('submit', async (e) => {
             }
         };
 
-        // 🔹 Conexión con Metamask y contrato
+        // --- 🔹 Conexión con Metamask y contrato ---
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(gestorReportesAddress, gestorReportesABI, signer);
 
-        // 🔹 Envío de la transacción
+        // --- 🔹 Envío de la transacción a la blockchain ---
         const tx = await contract.registrarReporte(data.direccionPaciente, historial, indicePEKS);
         modalMessage.textContent = "Registrando en la blockchain...";
         await tx.wait();
@@ -103,6 +136,7 @@ historialForm.addEventListener('submit', async (e) => {
         modalMessage.className = "text-red-600";
     }
 });
+
 
 // --- LÓGICA DE BÚSQUEDA ---
 const performSearch = async () => {

@@ -176,18 +176,44 @@ const performSearch = async () => {
                             <p><strong class="font-medium text-gray-600">Alergias:</strong> ${res.detalles.alergias || 'N/A'}</p>
                         </div>
 
-                        <div class="pt-2">
-                            <p class="font-medium text-gray-600">Diagnóstico Médico:</p>
-                            <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
-                                ${res.detalles.consulta?.diagnosticoMedico || 'No especificado'}
-                            </p>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Antecedentes Familiares</h4>
+                                <ul class="list-disc ml-5 text-gray-600">
+                                    <li><strong>Abuelos Paternos:</strong> ${res.detalles.antecedentesFamiliares?.abuelosPaternos || 'N/A'}</li>
+                                    <li><strong>Abuelos Maternos:</strong> ${res.detalles.antecedentesFamiliares?.abuelosMaternos || 'N/A'}</li>
+                                    <li><strong>Padre:</strong> ${res.detalles.antecedentesFamiliares?.padre || 'N/A'}</li>
+                                    <li><strong>Madre:</strong> ${res.detalles.antecedentesFamiliares?.madre || 'N/A'}</li>
+                                    <li><strong>Hermanos:</strong> ${res.detalles.antecedentesFamiliares?.hermanos || 'N/A'}</li>
+                                </ul>
                         </div>
 
-                        <div class="pt-2">
-                            <p class="font-medium text-gray-600">Receta / Medicamentos:</p>
-                            <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
-                                ${res.detalles.consulta?.medicamentos || 'No especificado'}
-                            </p>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Consulta Médica</h4>
+                            <p><strong>Peso:</strong> ${res.detalles.consulta?.peso || 'N/A'}</p>
+                            <p><strong>Temperatura:</strong> ${res.detalles.consulta?.temperatura || 'N/A'}</p>
+                            <p><strong>Oxigenación:</strong> ${res.detalles.consulta?.oxigenacion || 'N/A'}</p>
+                            <p><strong>Presión:</strong> ${res.detalles.consulta?.presion || 'N/A'}</p>
+
+                            <div class="pt-2">
+                                <p class="font-medium text-gray-600">Síntomas:</p>
+                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
+                                    ${res.detalles.consulta?.sintomas || 'No especificado'}
+                                </p>
+                            </div>
+
+                            <div class="pt-2">
+                                <p class="font-medium text-gray-600">Diagnóstico Médico:</p>
+                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
+                                    ${res.detalles.consulta?.diagnosticoMedico || 'No especificado'}
+                                </p>
+                            </div>
+
+                            <div class="pt-2">
+                                <p class="font-medium text-gray-600">Receta / Medicamentos:</p>
+                                <p class="text-gray-800 bg-gray-50 p-2 rounded-md">
+                                    ${res.detalles.consulta?.medicamentos || 'No especificado'}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 `).join('');
